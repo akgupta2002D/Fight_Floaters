@@ -1,13 +1,8 @@
 name: Create issues from issues.txt
 
 on:
-  workflow_dispatch:  # manual run from Actions tab
-  # Uncomment to auto-run when issues.txt changes:
-  # push:
-  #   paths:
-  #     - "issues.txt"
+  workflow_dispatch:
 
-# ✅ Explicit permissions so the GITHUB_TOKEN can write issues
 permissions:
   contents: read
   issues: write
@@ -20,43 +15,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Debug repo state
-        run: |
-          pwd
-          ls -la
-          echo "----"
-          echo "Repo: $GITHUB_REPOSITORY"
-          echo "Default branch: $GITHUB_REF_NAME"
-
-      - name: Verify issues.txt exists
-        id: check_file
-        run: |
-          if [ ! -f "issues.txt" ]; then
-            echo "issues.txt not found at repo root."
-            exit 1
-          fi
-          echo "found=true" >> $GITHUB_OUTPUT
-
+      # Read file content safely without using heredoc output syntax
       - name: Read issues.txt
         id: read_issues
         run: |
-          echo "issues<<EOF" >> $GITHUB_OUTPUT
-          sed '/^[[:space:]]*$/d' issues.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          if [ ! -f issues.txt ]; then
+            echo "issues.txt not found!"
+            exit 1
+          fi
+          echo "issues=$(cat issues.txt | tr '\n' ',' | sed 's/,$//')" >> $GITHUB_OUTPUT
 
-      - name: Create issues (skip duplicates)
+      - name: Create issues from list
         uses: actions/github-script@v7
         with:
           script: |
-            const lines = `${{ steps.read_issues.outputs.issues }}`.split('\n').map(s => s.trim()).filter(Boolean);
-            if (lines.length === 0) {
+            const raw = `${{ steps.read_issues.outputs.issues }}`.split(',').map(s => s.trim()).filter(Boolean);
+            if (raw.length === 0) {
               core.info("No issue titles found in issues.txt");
               return;
             }
 
-            // Fetch existing issues (all states) with simple pagination (first 5 pages x 100 = 500 issues)
             let existing = [];
-            for (let page = 1; page <= 5; page++) {
+            for (let page = 1; page <= 3; page++) {
               const { data } = await github.rest.issues.listForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -70,9 +50,9 @@ jobs:
 
             const existingTitles = new Set(existing.map(i => i.title));
 
-            for (const title of lines) {
+            for (const title of raw) {
               if (existingTitles.has(title)) {
-                core.info(`⚠️  Skip (duplicate): ${title}`);
+                core.info(`⚠️ Skipped duplicate: ${title}`);
                 continue;
               }
               await github.rest.issues.create({
