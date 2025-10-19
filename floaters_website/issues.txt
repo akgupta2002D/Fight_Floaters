@@ -1,0 +1,61 @@
+Visual Identity - Choose 1-2 primary colors, 
+
+1. Visual Identity
+Color Palette
+ Choose 1–2 primary brand colors.
+ Define 2–4 secondary support colors.
+ Add neutral colors for backgrounds and borders.
+ Specify accent colors for alerts and highlights.
+ Record HEX / RGB / HSL values in a brand color file.
+Typography
+ Select heading and body font families.
+ Define font size scale (H1–H6, body, caption).
+ Set font weights and spacing rules.
+ Document line heights and letter spacing.
+ Test text readability on light/dark backgrounds.
+Logo & Branding
+ Add vector and raster versions of logo.
+ Define clear-space and minimum size.
+ Create versions for dark/light backgrounds.
+ Document usage rules and positioning.
+🧩 2. Layout & Structure
+Grid & Spacing
+ Choose a grid system (e.g., 12-column).
+ Define base spacing unit (8px, 10px, etc.).
+ Apply consistent padding/margin increments.
+ Create visual examples in Figma or CSS.
+Responsive Design
+ Define breakpoints (mobile, tablet, desktop).
+ Test component scaling at each breakpoint.
+ Set container max-widths for layouts.
+ Build responsive typography scale.
+⚙️ 3. Components & UI Elements
+Core Components
+ Buttons (primary, secondary, disabled).
+ Inputs (text, dropdowns, checkboxes).
+ Navigation (header, footer, breadcrumbs).
+ Cards, Modals, Tables.
+ Alerts and Toasts.
+Documentation
+ Define hover/focus/active states.
+ Create a shared style guide for component padding, border radius, and shadows.
+ Store reusable components in a central folder or Storybook.
+🧠 4. Interaction & Behavior
+ Define hover/active animation durations.
+ Specify easing curve (ease-in-out, cubic-bezier, etc.).
+ Create rules for transitions (max 300ms).
+ Add accessibility focus states to interactive elements.
+ Test keyboard navigation and screen reader support.
+📄 5. Content & Tone
+ Define tone of voice (friendly, professional, witty).
+ Write copy style rules (capitalization, punctuation, CTA language).
+ Create a glossary for consistent terminology.
+ Choose image and illustration styles.
+ Write rules for alt text and captions.
+🧱 6. Implementation Guidelines
+ Choose CSS methodology (BEM, Tailwind, CSS Modules).
+ Define naming conventions for files and classes.
+ Set up design tokens for color, spacing, typography.
+ Create reusable UI component library.
+ Connect style tokens to code (CSS variables, JSON, etc.).
+ Build Storybook or equivalent documentation site.

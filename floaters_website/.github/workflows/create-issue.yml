@@ -1,0 +1,44 @@
+name: Create Issues from issue.txt
+
+on:
+  workflow_dispatch:  # Manual trigger from the Actions tab
+
+jobs:
+  create_issues:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read tasks file
+        id: readfile
+        run: |
+          echo "tasks<<EOF" >> $GITHUB_OUTPUT
+          cat issues.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create issues if not exist
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tasks = `${{ steps.readfile.outputs.tasks }}`.split('\n').filter(Boolean);
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all'
+            });
+            for (const title of tasks) {
+              const exists = existing.some(i => i.title === title);
+              if (!exists) {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title,
+                  body: "Auto-created from issues.txt"
+                });
+                console.log(`✅ Created issue: ${title}`);
+              } else {
+                console.log(`⚠️ Skipped existing issue: ${title}`);
+              }
+            }
