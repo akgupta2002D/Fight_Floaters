@@ -1,10 +1,10 @@
 import './App.css'
-
+import IntroSection from './intro/IntroSection.jsx'
 function App() {
 
   return (
     <>
-      <h1>Fight Floaters</h1>
+      <IntroSection />
     </>
   )
 }
