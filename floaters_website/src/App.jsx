@@ -1,6 +1,6 @@
 import './App.css'
 import IntroSection from './intro/IntroSection.jsx'
-function App() {
+const App = () => {
 
   return (
     <>
