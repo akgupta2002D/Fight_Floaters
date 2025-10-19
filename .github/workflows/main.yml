@@ -1,7 +1,16 @@
 name: Create issues from issues.txt
 
 on:
-  workflow_dispatch:  # lets you trigger it manually
+  workflow_dispatch:  # manual run from Actions tab
+  # Uncomment to auto-run when issues.txt changes:
+  # push:
+  #   paths:
+  #     - "issues.txt"
+
+# ✅ Explicit permissions so the GITHUB_TOKEN can write issues
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   create_issues:
@@ -11,35 +20,67 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug repo state
+        run: |
+          pwd
+          ls -la
+          echo "----"
+          echo "Repo: $GITHUB_REPOSITORY"
+          echo "Default branch: $GITHUB_REF_NAME"
+
+      - name: Verify issues.txt exists
+        id: check_file
+        run: |
+          if [ ! -f "issues.txt" ]; then
+            echo "issues.txt not found at repo root."
+            exit 1
+          fi
+          echo "found=true" >> $GITHUB_OUTPUT
+
       - name: Read issues.txt
         id: read_issues
         run: |
           echo "issues<<EOF" >> $GITHUB_OUTPUT
-          cat issues.txt >> $GITHUB_OUTPUT
+          sed '/^[[:space:]]*$/d' issues.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Create issues
+      - name: Create issues (skip duplicates)
         uses: actions/github-script@v7
         with:
           script: |
-            const issues = `${{ steps.read_issues.outputs.issues }}`.split('\n').filter(Boolean);
-            const { data: existing } = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'all',
-            });
-            for (const title of issues) {
-              const exists = existing.some(i => i.title === title);
-              if (!exists) {
-                await github.rest.issues.create({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  title,
-                  body: 'Auto-created from issues.txt via GitHub Actions',
-                  labels: ['automation']
-                });
-                console.log(`✅ Created issue: ${title}`);
-              } else {
-                console.log(`⚠️ Skipped duplicate issue: ${title}`);
+            const lines = `${{ steps.read_issues.outputs.issues }}`.split('\n').map(s => s.trim()).filter(Boolean);
+            if (lines.length === 0) {
+              core.info("No issue titles found in issues.txt");
+              return;
+            }
+
+            // Fetch existing issues (all states) with simple pagination (first 5 pages x 100 = 500 issues)
+            let existing = [];
+            for (let page = 1; page <= 5; page++) {
+              const { data } = await github.rest.issues.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'all',
+                per_page: 100,
+                page
+              });
+              existing = existing.concat(data);
+              if (data.length < 100) break;
+            }
+
+            const existingTitles = new Set(existing.map(i => i.title));
+
+            for (const title of lines) {
+              if (existingTitles.has(title)) {
+                core.info(`⚠️  Skip (duplicate): ${title}`);
+                continue;
               }
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body: 'Auto-created from issues.txt via GitHub Actions',
+                labels: ['automation']
+              });
+              core.info(`✅ Created: ${title}`);
             }
