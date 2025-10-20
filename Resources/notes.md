@@ -1,0 +1,1 @@
+Add a point where acne, eczema, and so many other coniditons are non life threatening but they affect a lot of people and there confidence. Connect this with flaoters. Prompt chatGPT to create a list of similar diseases.
