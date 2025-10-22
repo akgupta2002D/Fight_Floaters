@@ -3,6 +3,9 @@ import React, { use } from 'react'
 import { useState } from 'react'
 import FloatersPNG from './FloatersPNG'
 import useTimeout from '../hooks/useTimeout'
+import Typewriter from "typewriter-effect";
+
+
 
 const IntroSection = () => {
 
@@ -19,18 +22,32 @@ const IntroSection = () => {
 
     useTimeout(() => {
         setBlurBg(true);
-        const bgImg = document.querySelector('.intro_bg_container');
+        const bgImg = document.querySelector('.bg_and_floaters_container');
         if (bgImg) {
             bgImg.style.filter = 'blur(8px)';
         }
     }, 5000);
 
+    const [showIntroText, setShowIntroText] = useState(false);
+
+    const IntroText = ["Floaters", "SUCK!", "But we can help."];
+
+    useTimeout(() => {
+        setShowIntroText(true);
+    }, 5500);
+
     return (
-        
+        <>
         <div className='intro_bg_container'> 
-            <img src="./bg.avif" alt="A mountain landscape" />
-            {showFloaters && <FloatersPNG />}
+            <div className='bg_and_floaters_container'>
+                <img src="./bg.avif" alt="A mountain landscape" />
+                {showFloaters && <FloatersPNG />}
+            </div>
+            <div className='intro_text'>
+                {showIntroText && <h1>{IntroText.join(" ")}</h1>}
+            </div>
         </div>
+      </>
 
 
     )
