@@ -1,4 +1,5 @@
 const FloatersPNG = () => {
+
     return (
         <div className="floaters_png_container">
             <img
