@@ -4,7 +4,8 @@ import { useState } from 'react'
 import FloatersPNG from './FloatersPNG'
 import useTimeout from '../hooks/useTimeout'
 import Typewriter from "typewriter-effect";
-
+import Button from '../components_general/Button'
+import { Link } from 'react-router-dom';
 
 
 const IntroSection = () => {
@@ -36,6 +37,8 @@ const IntroSection = () => {
         setShowIntroText(true);
     }, 5500);
 
+
+
     return (
         <>
         <div className='intro_bg_container'> 
@@ -45,11 +48,14 @@ const IntroSection = () => {
             </div>
             <div className='intro_text'>
                 {showIntroText && <h1>{IntroText.join(" ")}</h1>}
+                {showIntroText && (
+                    <Button>
+                        <Link to="/hero">Begin the story!</Link>
+                    </Button>
+                )}
             </div>
         </div>
       </>
-
-
     )
 }
 
